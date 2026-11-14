@@ -8,8 +8,8 @@ from google.genai import types
 from openai import OpenAI
 from pydantic import ValidationError
 
-from lnvo_lens.config import settings
-from lnvo_lens.schemas import InvoiceData
+from invo_lens.config import settings
+from invo_lens.schemas import InvoiceData
 
 
 SYSTEM_PROMPT = (
@@ -28,7 +28,7 @@ SYSTEM_PROMPT = (
     '"supplier": {"name": "...", "tax_id": "...", "bank_account": "...", "address": "..."}, '
     '"buyer": {"name": "...", "tax_id": "...", "bank_account": "...", "address": "..."}, '
     '"currency": "UAH", "total_without_vat": 0.0, "vat_amount": 0.0, "total_amount": 0.0, '
-    '"items": [{"name": "...", "quantity": 1.0, "unit": "...", "price": 0.0, "amount": 0.0, "vat_rate": "20%"}]}'
+    '"items": [{"sku": "...", "name": "...", "quantity": 1.0, "unit": "...", "price": 0.0, "amount": 0.0, "vat_rate": "20%"}]}'
 )
 
 
@@ -116,6 +116,11 @@ def _normalize_parsed_json(parsed: Dict[str, Any]) -> Dict[str, Any]:
             if not isinstance(item, dict):
                 continue
             item = dict(item)
+            if "sku" not in item:
+                for alt in ("article", "code", "part_no", "vendor_code"):
+                    if alt in item:
+                        item["sku"] = item.pop(alt)
+                        break
             if "name" not in item and "description" in item:
                 item["name"] = item.pop("description")
             if "price" not in item and "unit_price" in item:

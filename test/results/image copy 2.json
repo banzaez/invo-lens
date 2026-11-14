@@ -1,0 +1,58 @@
+{
+  "job_id": "d1151c6e-f1a3-4083-bc2a-f1cb419a708f",
+  "status": "completed",
+  "created_at": "2026-11-14T17:45:47.678873Z",
+  "updated_at": "2026-11-14T17:46:15.420123Z",
+  "total_files": 1,
+  "processed_files": 1,
+  "results": [
+    {
+      "filename": "image copy 2.png",
+      "status": "success",
+      "data": {
+        "document_number": "28022015",
+        "document_date": "2014-09-22",
+        "supplier": {
+          "name": "Приватне підприємство \"Гадюкінськ Інтернейшл\"",
+          "tax_id": "192939415539",
+          "bank_account": null,
+          "address": "м.Одеса, вул. М.Говорова, 5.400, 65026"
+        },
+        "buyer": {
+          "name": "Товариство з обмеженою відповідальністю \"Південна Панкота\"",
+          "tax_id": "399999015413",
+          "bank_account": null,
+          "address": "м.Одеса, вул. Дальницька, 6. № 99, 65999"
+        },
+        "currency": "UAH",
+        "total_without_vat": 3840.0,
+        "vat_amount": null,
+        "total_amount": 3840.0,
+        "items": [
+          {
+            "name": "Дослідження якості продукції, відбір проб, проведення лабораторного контролю",
+            "quantity": 1.0,
+            "unit": "од.",
+            "price": 3200.0,
+            "amount": 3200.0,
+            "vat_rate": "7%",
+            "status": "success",
+            "warning": null
+          },
+          {
+            "name": "Зворотна (заставна) тара",
+            "quantity": 1.0,
+            "unit": null,
+            "price": 640.0,
+            "amount": 640.0,
+            "vat_rate": "0%",
+            "status": "success",
+            "warning": null
+          }
+        ]
+      },
+      "warnings": [],
+      "error": null
+    }
+  ]
+}

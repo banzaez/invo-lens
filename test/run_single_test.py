@@ -4,7 +4,7 @@ import time
 
 from fastapi.testclient import TestClient
 
-from lnvo_lens.main import app
+from invo_lens.main import app
 
 
 def main() -> None:

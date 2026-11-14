@@ -3,9 +3,9 @@ import io
 from typing import List
 
 import fitz  # PyMuPDF
-from PIL import Image, ImageOps
+from PIL import Image, ImageFilter, ImageOps
 
-from lnvo_lens.config import settings
+from invo_lens.config import settings
 
 
 SUPPORTED_IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".webp", ".bmp", ".tiff"}
@@ -25,6 +25,9 @@ def _enhance_image(image: Image.Image) -> Image.Image:
     elif max_side > 2400:
         scale = 2400 / max_side
         image = image.resize((int(w * scale), int(h * scale)), Image.Resampling.LANCZOS)
+
+    image = ImageOps.autocontrast(image, cutoff=0.5)
+    image = image.filter(ImageFilter.UnsharpMask(radius=1.2, percent=120, threshold=3))
 
     return image
 

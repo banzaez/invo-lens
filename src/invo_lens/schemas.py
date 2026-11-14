@@ -18,6 +18,10 @@ class DocumentStatus(str, Enum):
 
 
 class InvoiceItem(BaseModel):
+    sku: Optional[str] = Field(
+        None,
+        description="Артикул, код товара, SKU или Part No. (ищи в отдельной колонке 'Артикул/Код/SKU' или внутри названия товара; если нет — null)",
+    )
     name: str = Field(..., description="Точное наименование товара или услуги из строки таблицы")
     quantity: Optional[float] = Field(None, description="Количество (число, например 2.5)")
     unit: Optional[str] = Field(None, description="Единица измерения (например: шт, кг, л, м, hours, pcs, послуга)")

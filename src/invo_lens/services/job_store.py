@@ -9,16 +9,16 @@ import uuid
 
 import httpx
 
-from lnvo_lens.config import settings
-from lnvo_lens.schemas import (
+from invo_lens.config import settings
+from invo_lens.schemas import (
     DocumentResult,
     DocumentStatus,
     JobResponse,
     JobStatus,
 )
-from lnvo_lens.services.image_prep import file_bytes_to_base64_images
-from lnvo_lens.services.llm_client import extract_invoice_from_images
-from lnvo_lens.services.validator import validate_invoice
+from invo_lens.services.image_prep import file_bytes_to_base64_images
+from invo_lens.services.llm_client import extract_invoice_from_images
+from invo_lens.services.validator import validate_invoice
 
 logger = logging.getLogger(__name__)
 
@@ -85,11 +85,8 @@ class SQLiteJobStore:
             conn.commit()
         return job
 
-    def get_job(self, job_id: str) -> Optional[JobResponse]:
-        with self._connect() as conn:
-            row = conn.execute("SELECT * FROM jobs WHERE job_id = ?", (job_id,)).fetchone()
-        if not row:
-            return None
+    @staticmethod
+    def _row_to_job(row: sqlite3.Row) -> JobResponse:
         results_raw = json.loads(row["results_json"])
         return JobResponse(
             job_id=row["job_id"],
@@ -101,7 +98,38 @@ class SQLiteJobStore:
             results=[DocumentResult.model_validate(item) for item in results_raw],
         )
 
-    def _update_job(
+    def get_job(self, job_id: str) -> Optional[JobResponse]:
+        with self._connect() as conn:
+            row = conn.execute("SELECT * FROM jobs WHERE job_id = ?", (job_id,)).fetchone()
+        if not row:
+            return None
+        return self._row_to_job(row)
+
+    def list_jobs(self, limit: int = 50, offset: int = 0) -> List[JobResponse]:
+        with self._connect() as conn:
+            rows = conn.execute(
+                "SELECT * FROM jobs ORDER BY created_at DESC LIMIT ? OFFSET ?",
+                (limit, offset),
+            ).fetchall()
+        return [self._row_to_job(row) for row in rows]
+
+    def delete_job(self, job_id: str) -> bool:
+        with self._connect() as conn:
+            cursor = conn.execute("DELETE FROM jobs WHERE job_id = ?", (job_id,))
+            conn.commit()
+        return cursor.rowcount > 0
+
+    def mark_stale_jobs_failed(self) -> int:
+        now = datetime.now(timezone.utc).isoformat()
+        with self._connect() as conn:
+            cursor = conn.execute(
+                "UPDATE jobs SET status = ?, updated_at = ? WHERE status IN (?, ?)",
+                (JobStatus.FAILED.value, now, JobStatus.PENDING.value, JobStatus.PROCESSING.value),
+            )
+            conn.commit()
+        return cursor.rowcount
+
+    def update_job(
         self,
         job_id: str,
         *,
@@ -130,79 +158,6 @@ class SQLiteJobStore:
                 (new_status, now, new_processed, new_results, job_id),
             )
             conn.commit()
-
-    @staticmethod
-    def _process_single_file(filename: str, content: bytes) -> DocumentResult:
-        try:
-            images = file_bytes_to_base64_images(filename, content)
-            invoice_data = extract_invoice_from_images(images)
-            warnings = validate_invoice(invoice_data)
-            return DocumentResult(
-                filename=filename,
-                status=DocumentStatus.NEEDS_REVIEW if warnings else DocumentStatus.SUCCESS,
-                data=invoice_data,
-                warnings=warnings,
-            )
-        except Exception as exc:
-            return DocumentResult(
-                filename=filename,
-                status=DocumentStatus.ERROR,
-                error=str(exc),
-            )
-
-    def _send_webhook(self, job_id: str, callback_url: Optional[str]) -> None:
-        if not callback_url:
-            return
-        job = self.get_job(job_id)
-        if not job:
-            return
-        try:
-            httpx.post(callback_url, json=job.model_dump(mode="json"), timeout=10.0)
-        except Exception as exc:
-            logger.warning("Failed to deliver webhook for job %s to %s: %s", job_id, callback_url, exc)
-
-    def process_job(
-        self,
-        job_id: str,
-        files: List[Tuple[str, bytes]],
-        callback_url: Optional[str] = None,
-    ) -> None:
-        self._update_job(job_id, status=JobStatus.PROCESSING)
-
-        max_workers = (
-            settings.max_workers_gemini
-            if settings.llm_provider == "gemini"
-            else settings.max_workers_lm_studio
-        )
-        max_workers = max(1, min(max_workers, len(files)))
-
-        results_by_index: List[Optional[DocumentResult]] = [None] * len(files)
-        processed = 0
-
-        with ThreadPoolExecutor(max_workers=max_workers) as executor:
-            future_to_idx = {
-                executor.submit(self._process_single_file, filename, content): idx
-                for idx, (filename, content) in enumerate(files)
-            }
-            for future in as_completed(future_to_idx):
-                idx = future_to_idx[future]
-                results_by_index[idx] = future.result()
-                processed += 1
-                completed_results = [r for r in results_by_index if r is not None]
-                self._update_job(
-                    job_id,
-                    processed_files=processed,
-                    results=completed_results,
-                )
-
-        final_results = [r for r in results_by_index if r is not None]
-        self._update_job(
-            job_id,
-            status=JobStatus.COMPLETED,
-            processed_files=len(files),
-            results=final_results,
-        )
-        self._send_webhook(job_id, callback_url)
 
 
 job_store = SQLiteJobStore()

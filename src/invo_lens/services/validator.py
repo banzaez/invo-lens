@@ -1,7 +1,7 @@
 import re
 from typing import List, Optional
 
-from lnvo_lens.schemas import DocumentStatus, InvoiceData
+from invo_lens.schemas import DocumentStatus, InvoiceData
 
 
 def _parse_vat_percent(vat_rate: Optional[str]) -> Optional[float]:
