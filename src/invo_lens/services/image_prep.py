@@ -7,7 +7,6 @@ from PIL import Image, ImageFilter, ImageOps
 
 from invo_lens.config import settings
 
-
 SUPPORTED_IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".webp", ".bmp", ".tiff"}
 
 

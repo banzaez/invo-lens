@@ -1,16 +1,13 @@
 import base64
 import json
-import time
 from typing import Any, Dict, List, Optional
 
 from google import genai
 from google.genai import types
 from openai import OpenAI
-from pydantic import ValidationError
 
 from invo_lens.config import settings
 from invo_lens.schemas import InvoiceData
-
 
 SYSTEM_PROMPT = (
     "Ты — точная система для извлечения структурированных данных из накладных, счетов и инвойсов "

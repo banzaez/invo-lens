@@ -1,24 +1,17 @@
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from datetime import datetime, timezone
 import json
 import logging
 import sqlite3
 import threading
-from typing import List, Optional, Tuple
 import uuid
-
-import httpx
+from datetime import datetime, timezone
+from typing import List, Optional
 
 from invo_lens.config import settings
 from invo_lens.schemas import (
     DocumentResult,
-    DocumentStatus,
     JobResponse,
     JobStatus,
 )
-from invo_lens.services.image_prep import file_bytes_to_base64_images
-from invo_lens.services.llm_client import extract_invoice_from_images
-from invo_lens.services.validator import validate_invoice
 
 logger = logging.getLogger(__name__)
 
