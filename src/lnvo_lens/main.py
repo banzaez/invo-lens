@@ -1,6 +1,6 @@
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
-from fastapi import BackgroundTasks, FastAPI, File, HTTPException, UploadFile
+from fastapi import BackgroundTasks, FastAPI, File, Form, HTTPException, UploadFile
 
 from lnvo_lens.schemas import JobCreateResponse, JobResponse
 from lnvo_lens.services.job_store import job_store
@@ -21,6 +21,7 @@ def health() -> dict:
 async def create_recognition_job(
     background_tasks: BackgroundTasks,
     files: List[UploadFile] = File(..., description="Один или несколько файлов (PDF, PNG, JPG)"),
+    callback_url: Optional[str] = Form(None, description="Опциональный URL для webhook-уведомления по завершении"),
 ) -> JobCreateResponse:
     if not files:
         raise HTTPException(status_code=400, detail="Не передано ни одного файла")
@@ -30,8 +31,8 @@ async def create_recognition_job(
         content = await upload.read()
         file_payloads.append((upload.filename or "unnamed", content))
 
-    job = job_store.create_job(total_files=len(file_payloads))
-    background_tasks.add_task(job_store.process_job, job.job_id, file_payloads)
+    job = job_store.create_job(total_files=len(file_payloads), callback_url=callback_url)
+    background_tasks.add_task(job_store.process_job, job.job_id, file_payloads, callback_url)
 
     return JobCreateResponse(
         job_id=job.job_id,

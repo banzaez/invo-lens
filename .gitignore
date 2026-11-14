@@ -17,3 +17,12 @@ dist/
 .vscode/
 .idea/
 .DS_Store
+
+# Local SQLite DB
+*.db
+*.db-*
+
+# Environment variables
+.env
+.env.*
+!.env.example

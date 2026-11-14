@@ -1,0 +1,61 @@
+{
+  "job_id": "a5e638b3-d736-4426-b37d-9761f77bd500",
+  "status": "completed",
+  "created_at": "2026-11-14T17:36:22.261387Z",
+  "updated_at": "2026-11-14T17:36:50.053263Z",
+  "total_files": 1,
+  "processed_files": 1,
+  "results": [
+    {
+      "filename": "image.png",
+      "status": "needs_review",
+      "data": {
+        "document_number": "217",
+        "document_date": "2023-09-26",
+        "supplier": {
+          "name": "НДІ мікробіології ААН України",
+          "tax_id": "UA27300335000026007666666666",
+          "bank_account": "р/р UA27300335000026007666666666, м. Чернігів 14018, м. Чернігів, пр. Шевченка, 153",
+          "address": "м. Чернігів, пр. Шевченка, 153"
+        },
+        "buyer": {
+          "name": "ТОВ «Весна»",
+          "tax_id": "UA27353586000026005444444444",
+          "bank_account": "р/р UA27353586000026005444444444, м. Чернігів 14032, м. Чернігів, аул. Пухова 132",
+          "address": "м. Чернігів, аул. Пухова 132"
+        },
+        "currency": "UAH",
+        "total_without_vat": 500.0,
+        "vat_amount": 500.0,
+        "total_amount": 3000.0,
+        "items": [
+          {
+            "name": "мікропрепарат «Дізобактерин» (1 л)",
+            "quantity": 10.0,
+            "unit": "шт.",
+            "price": 183.33,
+            "amount": 1833.33,
+            "vat_rate": "20%",
+            "status": "success",
+            "warning": null
+          },
+          {
+            "name": "мікропрепарат «Хітомію» (уп. 0,5 кг)",
+            "quantity": 2.0,
+            "unit": "шт.",
+            "price": 333.33,
+            "amount": 666.67,
+            "vat_rate": "20%",
+            "status": "success",
+            "warning": null
+          }
+        ]
+      },
+      "warnings": [
+        "Итоги не сходятся: total_without_vat (500.0) + vat_amount (500.0) = 1000.0, но total_amount = 3000.0",
+        "Сумма по строкам (2500.0) не сходится ни с total_amount (3000.0), ни с total_without_vat (500.0)"
+      ],
+      "error": null
+    }
+  ]
+}

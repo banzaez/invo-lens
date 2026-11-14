@@ -3,7 +3,7 @@ import io
 from typing import List
 
 import fitz  # PyMuPDF
-from PIL import Image
+from PIL import Image, ImageOps
 
 from lnvo_lens.config import settings
 
@@ -11,9 +11,26 @@ from lnvo_lens.config import settings
 SUPPORTED_IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".webp", ".bmp", ".tiff"}
 
 
-def _pil_to_base64_png(image: Image.Image) -> str:
+def _enhance_image(image: Image.Image) -> Image.Image:
+    """Normalize orientation, size, contrast, and sharpness for better OCR/VLM accuracy."""
+    image = ImageOps.exif_transpose(image)
     if image.mode not in ("RGB", "L"):
         image = image.convert("RGB")
+
+    w, h = image.size
+    max_side = max(w, h)
+    if max_side < 1400:
+        scale = 1600 / max_side
+        image = image.resize((int(w * scale), int(h * scale)), Image.Resampling.LANCZOS)
+    elif max_side > 2400:
+        scale = 2400 / max_side
+        image = image.resize((int(w * scale), int(h * scale)), Image.Resampling.LANCZOS)
+
+    return image
+
+
+def _pil_to_base64_png(image: Image.Image) -> str:
+    image = _enhance_image(image)
     buf = io.BytesIO()
     image.save(buf, format="PNG")
     return base64.b64encode(buf.getvalue()).decode("utf-8")

@@ -1,0 +1,53 @@
+{
+  "job_id": "05b8912c-1893-4910-8300-faf3148e4bb0",
+  "status": "completed",
+  "created_at": "2026-11-14T16:18:53.044034Z",
+  "updated_at": "2026-11-14T16:19:12.267053Z",
+  "total_files": 1,
+  "processed_files": 1,
+  "results": [
+    {
+      "filename": "en_invoice_it_services.pdf",
+      "status": "success",
+      "data": {
+        "document_number": "INV-2026-0142",
+        "document_date": "2026-11-02",
+        "supplier_name": "CloudPeak Solutions Ltd",
+        "supplier_inn": "GB987654321",
+        "buyer_name": "FinCore Analytics Inc",
+        "buyer_inn": "US-44-9182736",
+        "currency": "USD",
+        "total_without_vat": 7620.0,
+        "vat_amount": 1524.0,
+        "total_amount": 9144.0,
+        "items": [
+          {
+            "name": "Cloud Infrastructure Management (AWS)",
+            "quantity": 1.0,
+            "unit": "month",
+            "price": 2500.0,
+            "amount": 3000.0,
+            "vat_rate": "20%"
+          },
+          {
+            "name": "Backend API Development (Python/FastAPI)",
+            "quantity": 40.0,
+            "unit": "hours",
+            "price": 95.0,
+            "amount": 4560.0,
+            "vat_rate": "20%"
+          },
+          {
+            "name": "DevOps & CI/CD Pipeline Setup",
+            "quantity": 12.0,
+            "unit": "hours",
+            "price": 110.0,
+            "amount": 1584.0,
+            "vat_rate": "20%"
+          }
+        ]
+      },
+      "error": null
+    }
+  ]
+}

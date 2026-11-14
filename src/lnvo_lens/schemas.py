@@ -13,36 +13,59 @@ class JobStatus(str, Enum):
 
 class DocumentStatus(str, Enum):
     SUCCESS = "success"
+    NEEDS_REVIEW = "needs_review"
     ERROR = "error"
 
 
 class InvoiceItem(BaseModel):
-    name: str = Field(..., description="Наименование товара или услуги")
-    quantity: Optional[float] = Field(None, description="Количество")
-    unit: Optional[str] = Field(None, description="Единица измерения (шт, кг, и т.д.)")
-    price: Optional[float] = Field(None, description="Цена за единицу")
-    amount: Optional[float] = Field(None, description="Общая сумма по позиции")
-    vat_rate: Optional[str] = Field(None, description="Ставка НДС (например, 20%, Без НДС)")
+    name: str = Field(..., description="Точное наименование товара или услуги из строки таблицы")
+    quantity: Optional[float] = Field(None, description="Количество (число, например 2.5)")
+    unit: Optional[str] = Field(None, description="Единица измерения (например: шт, кг, л, м, hours, pcs, послуга)")
+    price: Optional[float] = Field(None, description="Цена за единицу (число без пробелов и валюты)")
+    amount: Optional[float] = Field(None, description="Итоговая сумма по этой строке (число)")
+    vat_rate: Optional[str] = Field(None, description="Ставка НДС/ПДВ/VAT по строке (например: '20%', '0%', 'Без НДС', 'Без ПДВ')")
+    status: DocumentStatus = Field(DocumentStatus.SUCCESS, description="Статус проверки строки")
+    warning: Optional[str] = Field(None, description="Причина перепроверки строки, если есть")
+
+
+class PartyInfo(BaseModel):
+    name: Optional[str] = Field(None, description="Только наименование организации или ФОП/ИП (без адреса и счёта)")
+    tax_id: Optional[str] = Field(
+        None,
+        description="Универсальный налоговый/регистрационный номер: ИНН (RU), ЄДРПОУ или ІПН (UK), VAT или Tax ID (EN). Без префиксов",
+    )
+    bank_account: Optional[str] = Field(None, description="Расчётный счёт / IBAN / р/р (например: 'UA2730033500002600766666666666')")
+    address: Optional[str] = Field(None, description="Адрес или город (например: 'м. Чернігів')")
 
 
 class InvoiceData(BaseModel):
-    document_number: Optional[str] = Field(None, description="Номер накладной / документа")
-    document_date: Optional[str] = Field(None, description="Дата документа в формате YYYY-MM-DD")
-    supplier_name: Optional[str] = Field(None, description="Наименование поставщика")
-    supplier_inn: Optional[str] = Field(None, description="ИНН поставщика")
-    buyer_name: Optional[str] = Field(None, description="Наименование покупателя")
-    buyer_inn: Optional[str] = Field(None, description="ИНН покупателя")
-    currency: str = Field("RUB", description="Валюта документа (например, RUB, USD, EUR)")
-    total_without_vat: Optional[float] = Field(None, description="Итого без НДС")
-    vat_amount: Optional[float] = Field(None, description="Сумма НДС")
-    total_amount: Optional[float] = Field(None, description="Итоговая сумма к оплате с НДС")
-    items: List[InvoiceItem] = Field(default_factory=list, description="Список позиций в накладной")
+    document_number: Optional[str] = Field(None, description="Номер документа (например: 'INV-2026-0142', 'ВН-000452', '1024')")
+    document_date: Optional[str] = Field(
+        None,
+        pattern=r"^\d{4}-\d{2}-\d{2}$",
+        description="Дата документа строго в формате YYYY-MM-DD (например: '2026-11-05')",
+    )
+    supplier: Optional[PartyInfo] = Field(None, description="Реквизиты поставщика / продавца / исполнителя")
+    buyer: Optional[PartyInfo] = Field(None, description="Реквизиты покупателя / заказчика")
+    currency: str = Field(
+        "RUB",
+        pattern=r"^[A-Z]{3}$",
+        description="3-буквенный ISO-код валюты: RUB, UAH, USD, EUR (не символ)",
+    )
+    total_without_vat: Optional[float] = Field(None, description="Итоговая сумма без НДС/ПДВ/VAT (число)")
+    vat_amount: Optional[float] = Field(None, description="Сумма НДС/ПДВ/VAT (число, 0.0 если без НДС)")
+    total_amount: Optional[float] = Field(None, description="Итоговая сумма к оплате с НДС (число)")
+    items: List[InvoiceItem] = Field(
+        default_factory=list,
+        description="Все товарные/услуговые позиции из таблицы документа (без итоговых строк)",
+    )
 
 
 class DocumentResult(BaseModel):
     filename: str
     status: DocumentStatus
     data: Optional[InvoiceData] = None
+    warnings: List[str] = Field(default_factory=list)
     error: Optional[str] = None
 
 

@@ -1,0 +1,68 @@
+{
+  "job_id": "44cad921-90b0-4c23-a513-55460f00f6a8",
+  "status": "completed",
+  "created_at": "2026-11-14T17:40:24.249816Z",
+  "updated_at": "2026-11-14T17:40:54.190752Z",
+  "total_files": 1,
+  "processed_files": 1,
+  "results": [
+    {
+      "filename": "image copy.png",
+      "status": "success",
+      "data": {
+        "document_number": "154",
+        "document_date": "2025-07-28",
+        "supplier": {
+          "name": "Товариство з обмеженою відповідальністю «Альфа-Сервіс-М»",
+          "tax_id": "UA1234567890",
+          "bank_account": "AT КБ \"ПРИВАТБАНК\"",
+          "address": "36000, м. Полтава, вул. Соборності, 45"
+        },
+        "buyer": {
+          "name": "Фізична особа – підприємець Петренко Василь Іванович",
+          "tax_id": null,
+          "bank_account": null,
+          "address": null
+        },
+        "currency": "UAH",
+        "total_without_vat": 4450.0,
+        "vat_amount": 890.0,
+        "total_amount": 5340.0,
+        "items": [
+          {
+            "name": "Папір офісний А4, 80 г/м², 500 арк.",
+            "quantity": 10.0,
+            "unit": "пачка",
+            "price": 150.0,
+            "amount": 1500.0,
+            "vat_rate": "20%",
+            "status": "success",
+            "warning": null
+          },
+          {
+            "name": "Картридж для принтера HP LJ 1010",
+            "quantity": 2.0,
+            "unit": "шт.",
+            "price": 850.0,
+            "amount": 1700.0,
+            "vat_rate": "20%",
+            "status": "success",
+            "warning": null
+          },
+          {
+            "name": "Миша комп'ютерна бездротова Logitech",
+            "quantity": 5.0,
+            "unit": "шт.",
+            "price": 250.0,
+            "amount": 1250.0,
+            "vat_rate": "20%",
+            "status": "success",
+            "warning": null
+          }
+        ]
+      },
+      "warnings": [],
+      "error": null
+    }
+  ]
+}
