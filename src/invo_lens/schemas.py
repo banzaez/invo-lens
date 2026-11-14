@@ -23,6 +23,10 @@ class InvoiceItem(BaseModel):
         None,
         description="Артикул, код товара, SKU или Part No. (ищи в отдельной колонке 'Артикул/Код/SKU' или внутри названия товара; если нет — null)",
     )
+    barcode: Optional[str] = Field(
+        None,
+        description="Штрихкод товара (EAN-13, EAN-8, UPC, GTIN), если указан в строке; иначе null",
+    )
     name: str = Field(..., description="Точное наименование товара или услуги из строки таблицы")
     quantity: Optional[float] = Field(None, description="Количество (число, например 2.5)")
     unit: Optional[str] = Field(None, description="Единица измерения (например: шт, кг, л, м, hours, pcs, послуга)")
@@ -31,6 +35,10 @@ class InvoiceItem(BaseModel):
     vat_rate: Optional[str] = Field(None, description="Ставка НДС/ПДВ/VAT по строке (например: '20%', '0%', 'Без НДС', 'Без ПДВ')")
     status: DocumentStatus = Field(DocumentStatus.SUCCESS, description="Статус проверки строки")
     warning: Optional[str] = Field(None, description="Причина перепроверки строки, если есть")
+    matched_code: Optional[str] = Field(
+        None,
+        description="Код номенклатуры клиента, если позиция сопоставлена; иначе null",
+    )
 
 
 class PartyInfo(BaseModel):
@@ -88,3 +96,21 @@ class JobResponse(BaseModel):
     total_files: int
     processed_files: int
     results: List[DocumentResult] = Field(default_factory=list)
+
+
+class NomenclatureItem(BaseModel):
+    code: str = Field(..., min_length=1, description="Внутренний код номенклатуры клиента")
+    name: str = Field(..., min_length=1, description="Наименование позиции в справочнике клиента")
+    sku: Optional[str] = Field(None, description="Артикул / SKU в справочнике клиента")
+    barcode: Optional[str] = Field(None, description="Штрихкод товара (EAN/GTIN/UPC)")
+    unit: Optional[str] = Field(None, description="Единица измерения")
+
+
+class NomenclatureUploadRequest(BaseModel):
+    client_id: str = Field(..., min_length=1, description="Идентификатор клиента")
+    items: List[NomenclatureItem] = Field(..., description="Список позиций номенклатуры")
+
+
+class NomenclatureUploadResponse(BaseModel):
+    client_id: str
+    upserted: int

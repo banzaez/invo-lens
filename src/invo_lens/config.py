@@ -5,12 +5,15 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
+    api_key: Optional[str] = None
     llm_provider: Literal["lm_studio", "gemini"] = "lm_studio"
 
     lm_studio_base_url: str = "http://localhost:1234/v1"
     lm_studio_api_key: str = "lm-studio"
     lm_studio_model: str = "local-model"
+    lm_studio_embedding_model: Optional[str] = None
     lm_studio_enable_thinking: bool = False
+    nomenclature_match_threshold: float = 0.82
 
     gemini_api_key: Optional[str] = None
     gemini_model: str = "gemini-2.5-flash"

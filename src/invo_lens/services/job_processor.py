@@ -11,6 +11,7 @@ from invo_lens.schemas import DocumentResult, DocumentStatus, JobStatus
 from invo_lens.services.image_prep import file_bytes_to_base64_images
 from invo_lens.services.job_store import SQLiteJobStore, job_store
 from invo_lens.services.llm_client import extract_invoice_from_images
+from invo_lens.services.nomenclature_store import nomenclature_store
 from invo_lens.services.validator import validate_invoice
 
 logger = logging.getLogger(__name__)
@@ -23,11 +24,16 @@ class JobProcessor:
         self._store = store
 
     @staticmethod
-    def _process_single_file(filename: str, file_path: Path) -> DocumentResult:
+    def _process_single_file(
+        filename: str,
+        file_path: Path,
+        client_id: Optional[str] = None,
+    ) -> DocumentResult:
         try:
             content = file_path.read_bytes()
             images = file_bytes_to_base64_images(filename, content)
             invoice_data = extract_invoice_from_images(images)
+            nomenclature_store.match_invoice_items(client_id, invoice_data.items)
             warnings = validate_invoice(invoice_data)
             return DocumentResult(
                 filename=filename,
@@ -59,6 +65,7 @@ class JobProcessor:
         files: List[Tuple[str, Path]],
         temp_dir: Optional[Path] = None,
         callback_url: Optional[str] = None,
+        client_id: Optional[str] = None,
     ) -> None:
         try:
             self._store.update_job(job_id, status=JobStatus.PROCESSING)
@@ -75,7 +82,7 @@ class JobProcessor:
 
             with ThreadPoolExecutor(max_workers=max_workers) as executor:
                 future_to_idx = {
-                    executor.submit(self._process_single_file, filename, file_path): idx
+                    executor.submit(self._process_single_file, filename, file_path, client_id): idx
                     for idx, (filename, file_path) in enumerate(files)
                 }
                 for future in as_completed(future_to_idx):
